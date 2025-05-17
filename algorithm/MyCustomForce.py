@@ -1,6 +1,4 @@
 import numpy as np
-
-
 from hoomd.md.force import Custom
 
 class MyCustomForce(Custom):
