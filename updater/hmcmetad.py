@@ -25,7 +25,8 @@ class hMCMetaD(Action):
         seed: int = 1,
         bias_mode: bool = True,
         extra_colvar_mode: str = None,
-        extra_colvar_params = None
+        extra_colvar_params = None,
+        verbose: bool = False
     ):
         r"""
 
@@ -66,6 +67,8 @@ class hMCMetaD(Action):
 
             extra_colvar_params
 
+            verbose
+
         """
         super().__init__()
 
@@ -102,6 +105,7 @@ class hMCMetaD(Action):
         self._rng = np.random.default_rng(seed)
         self._counter = [0, 0]
         self.restart = restart
+        self.verbose = verbose
         if self.restart:
             self.writer_mode = "a"
             self._read_history(restart_fn)
@@ -113,15 +117,8 @@ class hMCMetaD(Action):
             self.height_history = np.empty(0)
 
         self._current_snapshot = sim.state.get_snapshot()
-        if self._colvar.mode == 'potential_energy':
-            self._current_cv = self._thermodynamic_properties.potential_energy
-        elif self._colvar.mode == 'combined':
-            tmp1 = float(self._colvar.func(self._current_snapshot))
-            tmp2 = self._thermodynamic_properties.potential_energy / 388
-            self._current_cv = tmp1 + 0.2851 * tmp2
-        else:
-            self._current_cv = float(self._colvar.func(self._current_snapshot))
-            self._current_extra_cv = float(self._extra_colvar.func(self._current_snapshot))
+        self._current_cv = float(self._colvar.func(self._current_snapshot))
+        self._current_extra_cv = float(self._extra_colvar.func(self._current_snapshot))
 
         self._current_bias_pot = self._calc_bias_potential(self._current_cv)
         sim.run(0)
@@ -138,12 +135,7 @@ class hMCMetaD(Action):
         if timestep % self.mc_stride == 1:
             trial_snapshot = self._state.get_snapshot()
             trial_potential_energy = self._thermodynamic_properties.potential_energy
-            if self._colvar.mode == 'potential_energy':
-                trial_cv = trial_potential_energy
-            elif self._colvar.mode == 'combined':
-                trial_cv = self._colvar.func(trial_snapshot) + 0.2851 * trial_potential_energy / 388
-            else:
-                trial_cv = self._colvar.func(trial_snapshot)
+            trial_cv = self._colvar.func(trial_snapshot)
 
             if self._bias_mode:
                 self._current_bias_pot = self._calc_bias_potential(self._current_cv)
@@ -213,7 +205,6 @@ class hMCMetaD(Action):
         return hoomd.write.HDF5Log(
             # The phase has to be 2 because of the order in which updater and writer are called
             trigger=hoomd.trigger.Periodic(int(self.mc_stride), 2),
-            # trigger=hoomd.trigger.Periodic(int(self.metad_stride), 2),
             filename=log_fn,
             logger=logger,
             mode=mode
@@ -244,6 +235,18 @@ class hMCMetaD(Action):
         self._state.set_snapshot(self._current_snapshot)
         hoomd.write.GSD.write(state=self._state, mode='wb', logger=logger,
                               filename=config_fn)
+        if self.verbose:
+            print(f'Saving status before exiting ...')
+            print(f'PE of the current configuration: {self._current_potential_energy}')
+            print(f'PE of the current configuration: {self._thermodynamic_properties.potential_energy}')
+
+            print(f'current bias pot: {self._current_bias_pot}')
+            print(f'current cv: {self._current_cv}')
+            print(f'last 5 element in cv array: {self.cv_history[-5:]}')
+            print(f'last 5 element in height array: {self.height_history[-5:]}')
+            print(f'Len of cv array: {len(self.cv_history)}')
+            print(f'Len of height array: {len(self.height_history)}')
+            print()
 
 
     def _read_history(self, history_fn):
@@ -255,6 +258,14 @@ class hMCMetaD(Action):
         self.deposit_timestep = bias_his_info['t'].tolist()
         self.cv_history = bias_his_info['cv_0(t)'].to_numpy()
         self.height_history = bias_his_info['h(t)'].to_numpy()
+
+        if self.verbose:
+            print(f'Reading history ....')
+            print(f'Len of initial cv history: {len(self.cv_history)}')
+            print(f'Len of initial height history: {len(self.height_history)}')
+            print(f'last 5 element in initial cv array: {self.cv_history[-5:]}')
+            print(f'last 5 element in inital height array: {self.height_history[-5:]}')
+            print()
 
 
     @log(category="scalar", requires_run=True)
