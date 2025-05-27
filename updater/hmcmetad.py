@@ -30,44 +30,49 @@ class hMCMetaD(Action):
     ):
         r"""
 
+        Custom HOOMD action for performing hybrid Monte Carlo Metadynamics simulations.
+
+        Provides methods for saving metadynamics data and restarting the biased simulation from saved states.
+
         Args:
             sim (hoomd.Simulation): hoomd.Simulation object.
 
-            colvar_mode: 
+            colvar_mode: Name of biased collective variable.
 
-            colvar_params: 
+            colvar_params: Parameters needed for calculating biased collective variable.
 
             kT (float): Temperature.
 
-            mc_stride (int): The period of executing MC step
+            mc_stride (int): Length of Molecular Dynamics run between successive Monte Carlo evaluations.
 
-            metad_stride (int): The period of depositing a gaussian bias. Assume to be an integer multiple of mc_stride.
+            metad_stride (int): Number of timesteps between successive Gaussian bias depositions, defined as an 
+                                integer multiple of `mc_stride`.
 
-            init_height (float): The height of gaussian biases.
+            init_height (float): Initial height of gaussian bias.
 
-            sigma (float): The width of gaussian biases.
+            sigma (float): Width of gaussian bias.
 
-            gamma (float): The bias factor of MetaD. Should be larger than 1.
+            gamma (float): Metadynamics bias factor. Should be larger than 1.
 
-            cv_min (float): The collective variable minima when calculate histogram.
+            cv_min (float): Minimum of collective variable, used for calculating ebetac.
 
-            cv_max (float): The collective variable maxima when calculate histogram.
+            cv_max (float): Maximum of collective variable, used for calculating ebetac.
 
-            bins (int): The number of bins when calculate histogram.
+            bins (int): Number of bins, used for calculating ebetac.
 
-            restart (bool):
+            restart (bool): If True, resume the simulation from a previously saved state. Defaults to False.
 
-            restart_fn (str):
+            restart_fn (str): File to read the bias history from if `restart` is True. Defaults to None.
 
-            seed (int): 
+            seed (int): Seed for the random number generator used in Monte Carlo evaluations. Defaults to 1.
 
-            bias_mode (bool): 
+            bias_mode (bool): Whether to run biased simulations. If False, run unbiased hybrid Monte Carlo simulations. Defaults to True.
 
-            extra_colvar_mode (str):
+            extra_colvar_mode (str): Name of an additional (not biased) collective variable. Defaults to None.
 
-            extra_colvar_params
+            extra_colvar_params: Parameters needed for calculating the additional collective variable. Defaults to None.
 
-            verbose
+            verbose (bool): If True, print diagnostic messages. Defaults to False.
 
         """
         super().__init__()

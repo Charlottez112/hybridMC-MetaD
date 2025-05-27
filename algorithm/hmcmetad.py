@@ -22,32 +22,37 @@ class hMCMetaD:
     ):
         r"""
 
+        Class for performing hybrid Monte Carlo Metadynamics simulations.
+
+        Provides methods for saving metadynamics data.
+
         Args:
             sim (hoomd.Simulation): hoomd.Simulation object.
 
-            colvar_mode: 
+            colvar_mode: Name of biased collective variable.
 
-            colvar_params: 
+            colvar_params: Parameters needed for calculating biased collective variable.
 
             kT (float): Temperature.
 
-            mc_stride (int): The period of executing MC step
+            mc_stride (int): Length of Molecular Dynamics run between successive Monte Carlo evaluations.
 
-            metad_stride (int): The period of depositing a gaussian bias. Assume to be an integer multiple of mc_stride.
+            metad_stride (int): Number of timesteps between successive Gaussian bias depositions, defined as an 
+                                integer multiple of `mc_stride`.
 
-            init_height (float): The height of gaussian biases.
+            init_height (float): Initial height of gaussian bias.
 
-            sigma (float): The width of gaussian biases.
+            sigma (float): Width of gaussian bias.
 
-            gamma (float): The bias factor of MetaD. Should be larger than 1.
+            gamma (float): Metadynamics bias factor. Should be larger than 1.
 
-            cv_min (float): The collective variable minima when calculate histogram.
+            cv_min (float): Minimum of collective variable, used for calculating ebetac.
 
-            cv_max (float): The collective variable maxima when calculate histogram.
+            cv_max (float): Maximum of collective variable, used for calculating ebetac.
 
-            bins (int): The number of bins when calculate histogram.
+            bins (int): Number of bins, used for calculating ebetac.
 
-            seed (int): 
+            seed (int): Seed for the random number generator used in Monte Carlo evaluations. Defaults to 1.
 
         """
         self._sim = sim
