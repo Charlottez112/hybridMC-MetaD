@@ -79,7 +79,11 @@ class hMCMetaD(Action):
 
 
         self._colvar = Colvar(mode=colvar_mode, extra_var=colvar_params)
-        self._extra_colvar = Colvar(mode=extra_colvar_mode, extra_var=extra_colvar_params)
+        if extra_colvar_mode is None:
+            self._extra_cv = False
+        else:
+            self._extra_cv = True
+            self._extra_colvar = Colvar(mode=extra_colvar_mode, extra_var=extra_colvar_params)
 
         self.kT = kT
         self.h0 = init_height
@@ -123,7 +127,8 @@ class hMCMetaD(Action):
 
         self._current_snapshot = sim.state.get_snapshot()
         self._current_cv = float(self._colvar.func(self._current_snapshot))
-        self._current_extra_cv = float(self._extra_colvar.func(self._current_snapshot))
+        if self._extra_cv:
+            self._current_extra_cv = float(self._extra_colvar.func(self._current_snapshot))
 
         self._current_bias_pot = self._calc_bias_potential(self._current_cv)
         sim.run(0)
@@ -159,8 +164,8 @@ class hMCMetaD(Action):
 
                 self._counter[0] += 1
                 self._current_cv = trial_cv
-
-                self._current_extra_cv = self._extra_colvar.func(self._current_snapshot)
+                if self._extra_cv:
+                    self._current_extra_cv = self._extra_colvar.func(self._current_snapshot)
 
                 if self._bias_mode:
                     self._current_bias_pot = trial_bias_pot
@@ -183,18 +188,29 @@ class hMCMetaD(Action):
         logger = hoomd.logging.Logger(categories=["scalar"])
         hoomd.logging.modify_namespace(self, namespace=())
         if self._bias_mode:
-
-            logger.add(
-                self,
-                quantities=[
-                    "t",
-                    "acceptance_ratio",
-                    "collective_variable",
-                    "extra_collective_variable",
-                    "bias_potential",
-                    "ebetac",
-                ],
-            )
+            if self._extra_cv:
+                logger.add(
+                    self,
+                    quantities=[
+                        "t",
+                        "acceptance_ratio",
+                        "collective_variable",
+                        "extra_collective_variable",
+                        "bias_potential",
+                        "ebetac",
+                    ],
+                )
+            else:
+                logger.add(
+                    self,
+                    quantities=[
+                        "t",
+                        "acceptance_ratio",
+                        "collective_variable",
+                        "bias_potential",
+                        "ebetac",
+                    ],
+                )
         else:
             logger.add(
                 self,
