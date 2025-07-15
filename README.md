@@ -1,6 +1,6 @@
 ## Code for paper: Hybrid Monte Carlo Metadynamics
 
-In paper, *Hybrid Monte Carlo Metadynamics*, we introduce a new algorithm that couples the Hybrid Monte Carlo algorithm and Metadynamics, which we term "hMCMetaD".
+In paper, *Hybrid Monte Carlo Metadynamics*, we introduce a new algorithm that integrates the Hybrid Monte Carlo algorithm with Metadynamics, which we term "hybridMC-MetaD" (hMCMetaD in this git repository).
 
-* `algorithm` folder: implementation of hMCMetaD algorithm and an illustrative example on a double-well model system
-* `updater` folder: implementation of hMCMetaD as a HOOMD-blue custom updater and an example of using hMCMetaD on a hard bipyramid system
+* `algorithm` folder: implementation of hybridMC-MetaD (hMCMetaD) algorithm and an illustrative example on a double-well model system
+* `updater` folder: implementation of hybridMC-MetaD (hMCMetaD) as a HOOMD-blue custom updater and an example of using it on a hard bipyramid system
